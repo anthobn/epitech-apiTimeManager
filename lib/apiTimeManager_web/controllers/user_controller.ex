@@ -1,20 +1,17 @@
 defmodule ApiTimeManagerWeb.UserController do
   use ApiTimeManagerWeb, :controller
 
-  def index(conn, %{"email" => email, "username" => username}) do
-    user = ApiTimeManager.Repo.get_by(ApiTimeManager.User, [email: email, username: username])
-    case user do
-      nil -> conn |> put_status(404) |> html("")
-      _ -> render conn, "show.json", user: user
+  def index(conn, params) do
+
+    if Map.has_key?(params, "email") && Map.has_key?(params, "username") do
+      renderONE(conn, ApiTimeManager.Repo.get_by(ApiTimeManager.User, [email: params["email"], username: params["username"]]))
+    else
+      renderMANY(conn, ApiTimeManager.Repo.all(ApiTimeManager.User))
     end
   end
 
   def show(conn, %{"id" => userID}) do
-    user = ApiTimeManager.Repo.get(ApiTimeManager.User, userID)
-    case user do
-      nil -> conn |> put_status(404) |> html("")
-      _ -> render conn, "show.json", user: user
-     end
+    renderONE(conn, ApiTimeManager.Repo.get(ApiTimeManager.User, userID))
   end
 
   def create(conn, %{"email" => email, "username" => username}) do
@@ -22,15 +19,9 @@ defmodule ApiTimeManagerWeb.UserController do
 
     if changeset.valid? do
       ApiTimeManager.Repo.insert(changeset)
-      userBDD = ApiTimeManager.Repo.get_by(ApiTimeManager.User, [email: email, username: username])
-      
-      case userBDD do
-        nil -> conn |> put_status(404) |> html("")
-        _ -> render conn, "show.json", user: userBDD
-       end
-
+      renderONE(conn, ApiTimeManager.Repo.get_by(ApiTimeManager.User, [email: email, username: username]))
     else
-      conn |> put_status(400) |> html("")
+      renderStatus(conn, 404)
     end
   end
 
@@ -43,14 +34,9 @@ defmodule ApiTimeManagerWeb.UserController do
 
       ApiTimeManager.Repo.update(changeset)
 
-      userBDD = ApiTimeManager.Repo.get!(ApiTimeManager.User, userID)
-      
-      case userBDD do
-        nil -> conn |> put_status(404) |> html("")
-        _ -> render conn, "show.json", user: userBDD
-       end
+      renderONE(conn, ApiTimeManager.Repo.get!(ApiTimeManager.User, userID))
     else
-      conn |> put_status(400) |> html("")
+      renderStatus(conn, 404)
     end
   end
 
@@ -59,10 +45,9 @@ defmodule ApiTimeManagerWeb.UserController do
 
     if user do
       ApiTimeManager.Repo.delete(user)
-      conn |> put_status(200) |> html("")
+      renderStatus(conn, 200)
     else
-      conn |> put_status(404) |> html("")
+      renderStatus(conn, 404)
     end
-
   end
 end

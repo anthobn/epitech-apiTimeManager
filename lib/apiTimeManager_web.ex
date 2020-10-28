@@ -23,6 +23,7 @@ defmodule ApiTimeManagerWeb do
 
       import Plug.Conn
       import ApiTimeManagerWeb.Gettext
+      import ApiTimeManagerWeb.Controllers.Helpers
       alias ApiTimeManagerWeb.Router.Helpers, as: Routes
     end
   end

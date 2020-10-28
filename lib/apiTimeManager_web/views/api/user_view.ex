@@ -1,8 +1,12 @@
 defmodule ApiTimeManagerWeb.UserView do
   use ApiTimeManagerWeb, :view
 
-  def render("show.json", %{user: user}) do
+  def render("show_one.json", %{user: user}) do
     render_one(user, ApiTimeManagerWeb.UserView, "user.json")
+  end
+
+  def render("show_many.json", %{users: users}) do
+    render_many(users, ApiTimeManagerWeb.UserView, "user.json")
   end
 
   def render("user.json", %{user: user}) do
