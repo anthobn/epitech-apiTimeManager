@@ -1,6 +1,8 @@
 defmodule ApiTimeManagerWeb.Router do
   use ApiTimeManagerWeb, :router
 
+  alias ApiTimeManager.Guardian
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -14,6 +16,10 @@ defmodule ApiTimeManagerWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :jwt_authenticated do
+    plug Guardian.AuthPipeline
+  end
+
   scope "/", ApiTimeManagerWeb do
     pipe_through :browser
 
@@ -22,11 +28,10 @@ defmodule ApiTimeManagerWeb.Router do
 
   # Other scopes may use custom stacks.
   scope "/api", ApiTimeManagerWeb do
-    pipe_through :api
+    pipe_through [:api, :jwt_authenticated]
 
-    resources "/users", UserController, except: [:new, :edit]
-	options   "/users", UserController, :options
-	get "/users", UserController, :index
+    resources "/users", UserController, except: [:new, :create, :edit]
+	  #options   "/users", UserController, :options
 
     scope "/workingtimes" do
       resources "/", WorkingTimeController, only: [:index, :update, :delete]
@@ -35,6 +40,14 @@ defmodule ApiTimeManagerWeb.Router do
 
     resources "/clocks/:userID", ClockController, only: [:index, :create]
 
+
+  end
+
+  scope "/api/users", ApiTimeManagerWeb do
+    pipe_through :api
+
+    post "/sign_in", UserController, :sign_in
+    resources "/", UserController, only: [:create]
 
   end
 
