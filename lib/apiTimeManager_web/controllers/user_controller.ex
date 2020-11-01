@@ -1,6 +1,17 @@
 defmodule ApiTimeManagerWeb.UserController do
   use ApiTimeManagerWeb, :controller
 
+  alias ApiTimeManager.Guardian
+
+  def sign_in(conn, %{"email" => email, "password" => password}) do
+    case ApiTimeManager.Accounts.token_sign_in(email, password) do
+      {:ok, token, _claims} ->
+        conn |> render("jwt.json", jwt: token)
+      _ ->
+        {:error, :unauthorized}
+    end
+  end
+  
   def index(conn, params) do
 
     if Map.has_key?(params, "email") && Map.has_key?(params, "username") do
@@ -14,6 +25,26 @@ defmodule ApiTimeManagerWeb.UserController do
     renderONE(conn, ApiTimeManager.Repo.get(ApiTimeManager.User, userID))
   end
 
+  def create(conn, %{"user" => user_params}) do
+    with {:ok, %ApiTimeManager.User{} = user} <- ApiTimeManager.Accounts.create_user(user_params),
+         {:ok, token, _claims} <- Guardian.encode_and_sign(user) do
+      conn |> render("jwt.json", jwt: token)
+    end
+  end
+
+@oldCreateMethodWithTuto """
+  def create(conn, %{"user" => user_params}) do
+    with {:ok, %ApiTimeManager.User{} = user} <- Accounts.create_user(user_params) do
+      conn
+      |> put_status(:created)
+      |> put_resp_header("location", user_path(conn, :show, user))
+      |> render("show.json", user: user)
+    end
+  end
+
+"""
+
+@oldCreateMethod """
   def create(conn, %{"email" => email, "username" => username}) do
     changeset = ApiTimeManager.User.changeset(%ApiTimeManager.User{}, %{username: username, email: email})
 
@@ -24,6 +55,7 @@ defmodule ApiTimeManagerWeb.UserController do
       renderStatus(conn, 404)
     end
   end
+"""
 
   def update(conn, %{"id" => userID, "email" => email, "username" => username}) do
     user = ApiTimeManager.Repo.get!(ApiTimeManager.User, userID)

@@ -24,9 +24,10 @@ defmodule ApiTimeManagerWeb.Router do
   scope "/api", ApiTimeManagerWeb do
     pipe_through :api
 
-    resources "/users", UserController, except: [:new, :edit]
-	options   "/users", UserController, :options
-	get "/users", UserController, :index
+    resources "/users", UserController, only: [:create, :show]
+    post "/sign_in", UserController, :sign_in
+    #resources "/users", UserController, except: [:new, :edit]
+	  #options   "/users", UserController, :options
 
     scope "/workingtimes" do
       resources "/", WorkingTimeController, only: [:index, :update, :delete]
