@@ -5,14 +5,14 @@ defmodule ApiTimeManagerWeb.Controllers.Helpers do
   def renderONE(conn, data) do
     case data do
       nil -> conn |> put_status(404) |> html("")
-      _ -> render conn, "show_one.json", user: data
+      _ -> render conn, "show.json", user: data
     end
   end
 
   def renderMANY(conn, data) do
     case data do
       nil -> conn |> put_status(404) |> html("")
-      _ -> render conn, "show_many.json", users: data
+      _ -> render conn, "index.json", users: data
     end
   end
 

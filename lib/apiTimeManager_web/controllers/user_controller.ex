@@ -3,6 +3,8 @@ defmodule ApiTimeManagerWeb.UserController do
 
   alias ApiTimeManager.Guardian
 
+  action_fallback ApiTimeManagerWeb.FallbackController
+
   def sign_in(conn, %{"email" => email, "password" => password}) do
     case ApiTimeManager.Accounts.token_sign_in(email, password) do
       {:ok, token, _claims} ->
