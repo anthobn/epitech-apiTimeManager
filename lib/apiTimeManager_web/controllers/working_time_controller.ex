@@ -32,7 +32,6 @@ defmodule ApiTimeManagerWeb.WorkingTimeController do
   def create(conn, %{"userID" => userID}) do
     time = NaiveDateTime.utc_now
     user = ApiTimeManager.Repo.preload(ApiTimeManager.Repo.get(ApiTimeManager.User, userID), :clocks)
-    currentClock = nil
     
     Enum.each user.clocks, fn clock -> 
       if clock.status == true do

@@ -15,6 +15,7 @@ defmodule ApiTimeManager.Clock do
     clock
     |> cast(attrs, [:time, :status, :user_id])
     |> validate_required([:time, :status, :user_id])
+    |> unique_constraint(:id, name: :clocks_pkey)
   end
 
   def startTime(user) do

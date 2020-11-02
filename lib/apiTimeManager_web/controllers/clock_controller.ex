@@ -3,16 +3,10 @@ defmodule ApiTimeManagerWeb.ClockController do
   import Ecto.Query
 
   defmodule DataBase do
-    def updateBDD(changeset, userID, conn) do
+    def createClock(changeset, userID, conn) do
       if changeset.valid? do
         ApiTimeManager.Repo.insert(changeset)
-        clockBDD = ApiTimeManager.Repo.get_by!(ApiTimeManager.Clock, user_id: userID)
-        
-        case clockBDD do
-          nil -> conn |> put_status(404) |> html("")
-          _ -> render conn, "show_one.json", clock: clockBDD
-        end
-
+        renderONE(conn, (ApiTimeManager.Repo.get_by!(ApiTimeManager.Clock, user_id: userID)))
       else
         conn |> put_status(400) |> html("")
       end
@@ -20,24 +14,23 @@ defmodule ApiTimeManagerWeb.ClockController do
   end
 
   def index(conn, %{"userID" => userID}) do
-    clock = ApiTimeManager.Repo.all(from clock in ApiTimeManager.Clock, where: clock.user_id == ^userID)
-
-    case clock do
-      nil -> conn |> put_status(404) |> html("")
-      _ -> render conn, "show_many.json", clock: clock
-     end
+    renderMANY(conn, (ApiTimeManager.Repo.all(from clock in ApiTimeManager.Clock, where: clock.user_id == ^userID)))
   end
 
   def create(conn, %{"userID" => userID}) do
     time = NaiveDateTime.utc_now
     user = ApiTimeManager.Repo.preload(ApiTimeManager.Repo.all(from user in ApiTimeManager.User, where: user.id == ^userID), :clocks)
 
-    if List.last(user).clocks !== nil && List.last(List.last(user).clocks).status == true do
-    #If clock is in progress
-    #create workingtime
-    conn |> put_status(502) |> html("")
+    if List.last(List.last(user).clocks) !== nil && List.last(List.last(user).clocks).status == true do
+
+      #If clock exist and is in progress, create workingtime
+      clockOut(conn, (List.last(List.last(user).clocks)))
+
     else
-      DataBase.updateBDD(ApiTimeManager.Clock.changeset(%ApiTimeManager.Clock{}, %{user_id: userID, time: time, status: true}), userID, conn)
+
+      #If not exist clock for this user, create clock
+      DataBase.createClock(ApiTimeManager.Clock.changeset(%ApiTimeManager.Clock{}, %{user_id: userID, time: time, status: true}), userID, conn)
+
     end
   end
 end
