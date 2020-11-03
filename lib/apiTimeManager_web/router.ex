@@ -47,7 +47,7 @@ defmodule ApiTimeManagerWeb.Router do
     pipe_through :api
 
     post "/sign_in", UserController, :sign_in
-    resources "/", UserController, only: [:create]
+    resources "/sign_up", UserController, only: [:create]
 
   end
 
