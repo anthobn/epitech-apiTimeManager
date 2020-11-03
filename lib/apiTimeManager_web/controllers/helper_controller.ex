@@ -24,7 +24,7 @@ defmodule ApiTimeManagerWeb.Controllers.Helpers do
     clock = ApiTimeManager.Repo.preload(clock, :user)
 
     #Update clock to false
-    ApiTimeManager.Repo.insert(ApiTimeManager.Clock.changeset(clock, %{status: false}))
+    ApiTimeManager.Repo.update(ApiTimeManager.Clock.changeset(clock, %{status: false}))
     createWorkingTime(conn, clock.user.id, clock.time, NaiveDateTime.utc_now)
   end
 
@@ -32,10 +32,12 @@ defmodule ApiTimeManagerWeb.Controllers.Helpers do
     timeStart = NaiveDateTime.truncate(timeStart, :second)
     timeEnd = NaiveDateTime.truncate(timeEnd, :second)
 
-    wt = %ApiTimeManager.WorkingTime{user_id: userID, start: timeStart, end: timeEnd}
-    ApiTimeManager.Repo.insert(wt)
+    ApiTimeManager.Repo.insert(%ApiTimeManager.WorkingTime{user_id: userID, start: timeStart, end: timeEnd})
 
-    renderONE(conn, wt)
+    workingtime = ApiTimeManager.Repo.get_by(ApiTimeManager.WorkingTime, [user_id: userID, start: timeStart, end: timeEnd])
+    workingtime = ApiTimeManager.Repo.preload(workingtime, :user)
+
+    render(conn, ApiTimeManagerWeb.WorkingTimeView, "show.json", data: workingtime)
   end
   
   #default

@@ -2,11 +2,11 @@ defmodule ApiTimeManagerWeb.ClockView do
   use ApiTimeManagerWeb, :view
 
   def render("show.json", %{data: clock}) do
-    render_one(clock, ApiTimeManagerWeb.ClockView, "clock.json")
+    %{clock: render_one(clock, ApiTimeManagerWeb.ClockView, "clock.json")}
   end
   
   def render("index.json", %{data: clock}) do
-    render_many(clock, ApiTimeManagerWeb.ClockView, "clock.json")
+    %{clocks: render_many(clock, ApiTimeManagerWeb.ClockView, "clock.json")}
   end
 
   def render("clock.json", %{clock: clock}) do

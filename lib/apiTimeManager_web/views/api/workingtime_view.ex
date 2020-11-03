@@ -1,22 +1,26 @@
 defmodule ApiTimeManagerWeb.WorkingTimeView do
   use ApiTimeManagerWeb, :view
 
-  def render("show_one.json", %{workingtime: workingtime}) do
-    render_one(workingtime, ApiTimeManagerWeb.WorkingTimeView, "workingtime.json")
+  def render("show.json", %{data: workingtime}) do
+    %{workingtime: render_one(workingtime, ApiTimeManagerWeb.WorkingTimeView, "workingtime.json")}
   end
   
-  def render("show_many.json", %{workingtime: workingtime}) do
-    render_many(workingtime, ApiTimeManagerWeb.WorkingTimeView, "workingtime.json")
+  def render("index.json", %{data: workingtime}) do
+    %{workingtimes: render_many(workingtime, ApiTimeManagerWeb.WorkingTimeView, "workingtime.json")}
   end
 
-  def render("workingtime.json", %{workingtime: workingtime}) do
-    IO.puts('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
-    IO.inspect workingtime
+  def render("workingtime.json", workingtime) do
+    workingtime = workingtime.working_time
     %{
       start: workingtime.start,
       end: workingtime.end,
       inserted_at: workingtime.inserted_at,
-      updated_at: workingtime.updated_at
+      updated_at: workingtime.updated_at,
+      user: %{
+        user_id: workingtime.user.id,
+        username: workingtime.user.username,
+        email: workingtime.user.email
+      }
     }
   end
 

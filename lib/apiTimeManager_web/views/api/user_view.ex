@@ -3,11 +3,11 @@ defmodule ApiTimeManagerWeb.UserView do
   alias ApiTimeManagerWeb.UserView
 
   def render("index.json", %{data: users}) do
-    %{data: render_many(users, UserView, "user.json")}
+    %{users: render_many(users, UserView, "user.json")}
   end
 
   def render("show.json", %{data: user}) do
-    %{data: render_one(user, UserView, "user.json")}
+    %{user: render_one(user, UserView, "user.json")}
   end
 
   def render("user.json", %{user: user}) do
