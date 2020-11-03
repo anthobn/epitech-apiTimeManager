@@ -1,13 +1,17 @@
 defmodule ApiTimeManager.User do
   use Ecto.Schema
   import Ecto.Changeset
+  import EctoEnum
 
   import Comeonin.Bcrypt, only: [hashpwsalt: 1]
+  
+  defenum RolesEnum, :role, [:employee, :manager, :admin]
 
   schema "users" do
     field :email, :string
     field :username, :string
     field :password_hash, :string
+    field :role, RolesEnum, default: "employee"
 
     field :password, :string, virtual: true
     field :password_confirmation, :string, virtual: true
@@ -21,8 +25,8 @@ defmodule ApiTimeManager.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:username, :email, :password, :password_confirmation])
-    |> validate_required([:username, :email, :password, :password_confirmation])
+    |> cast(attrs, [:username, :email, :password, :password_confirmation, :role])
+    |> validate_required([:username, :email, :password, :password_confirmation, :role])
     |> validate_format(:email, ~r/@/)
     |> validate_length(:password, min: 8)
     |> validate_confirmation(:password)
