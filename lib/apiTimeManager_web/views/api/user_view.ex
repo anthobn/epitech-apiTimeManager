@@ -15,6 +15,7 @@ defmodule ApiTimeManagerWeb.UserView do
       id: user.id,
       username: user.username,
       email: user.email,
+      role: user.role,
       password_hash: user.password_hash,
       inserted_at: user.inserted_at,
       updated_at: user.updated_at
