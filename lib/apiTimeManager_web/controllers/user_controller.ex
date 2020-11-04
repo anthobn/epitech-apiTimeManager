@@ -5,8 +5,8 @@ defmodule ApiTimeManagerWeb.UserController do
 
   action_fallback ApiTimeManagerWeb.FallbackController
 
-  def sign_in(conn, %{"email" => email, "password" => password}) do
-    case ApiTimeManager.Accounts.token_sign_in(email, password) do
+  def sign_in(conn, %{"user" => user_params}) do
+    case ApiTimeManager.Accounts.token_sign_in(user_params["email"], user_params["password"]) do
       {:ok, token, _claims} ->
         conn |> render("jwt.json", jwt: token)
       _ ->
