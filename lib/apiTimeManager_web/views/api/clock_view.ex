@@ -11,11 +11,15 @@ defmodule ApiTimeManagerWeb.ClockView do
 
   def render("clock.json", %{clock: clock}) do
     %{
-      user: clock.user_id,
       time: clock.time,
       status: clock.status,
       inserted_at: clock.inserted_at,
-      updated_at: clock.updated_at
+      updated_at: clock.updated_at,
+      user: %{
+        id: clock.user.id,
+        username: clock.user.username,
+        email: clock.user.email
+      }
     }
   end
 

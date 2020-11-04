@@ -10,6 +10,7 @@ defmodule ApiTimeManagerWeb.ClockController do
     ApiTimeManager.Repo.insert(%ApiTimeManager.Clock{user_id: userID, time: time, status: true})
 
     clock = ApiTimeManager.Repo.get_by(ApiTimeManager.Clock, [user_id: userID, time: time])
+    clock = ApiTimeManager.Repo.preload(clock, :user)
 
     renderONE(conn, clock)
     end

@@ -17,7 +17,7 @@ defmodule ApiTimeManagerWeb.WorkingTimeView do
       inserted_at: workingtime.inserted_at,
       updated_at: workingtime.updated_at,
       user: %{
-        user_id: workingtime.user.id,
+        id: workingtime.user.id,
         username: workingtime.user.username,
         email: workingtime.user.email
       }
