@@ -5,14 +5,14 @@ defmodule ApiTimeManagerWeb.Controllers.Helpers do
   def renderONE(conn, data) do
     case data do
       nil -> conn |> put_status(404) |> html("")
-      _ -> render conn, "show.json", user: data
+      _ -> render conn, "show.json", data: data
     end
   end
 
   def renderMANY(conn, data) do
     case data do
       nil -> conn |> put_status(404) |> html("")
-      _ -> render conn, "index.json", users: data
+      _ -> render conn, "index.json", data: data
     end
   end
 
@@ -20,7 +20,25 @@ defmodule ApiTimeManagerWeb.Controllers.Helpers do
     conn |> put_status(status) |> html("")
   end
 
+  def clockOut(conn, clock) do
+    clock = ApiTimeManager.Repo.preload(clock, :user)
 
+    #Update clock to false
+    ApiTimeManager.Repo.update(ApiTimeManager.Clock.changeset(clock, %{status: false}))
+    createWorkingTime(conn, clock.user.id, clock.time, NaiveDateTime.utc_now)
+  end
+
+  def createWorkingTime(conn, userID, timeStart, timeEnd) do
+    timeStart = NaiveDateTime.truncate(timeStart, :second)
+    timeEnd = NaiveDateTime.truncate(timeEnd, :second)
+
+    ApiTimeManager.Repo.insert(%ApiTimeManager.WorkingTime{user_id: userID, start: timeStart, end: timeEnd})
+
+    workingtime = ApiTimeManager.Repo.get_by(ApiTimeManager.WorkingTime, [user_id: userID, start: timeStart, end: timeEnd])
+    workingtime = ApiTimeManager.Repo.preload(workingtime, :user)
+
+    render(conn, ApiTimeManagerWeb.WorkingTimeView, "show.json", data: workingtime)
+  end
   
   #default
   
