@@ -5,10 +5,12 @@ defmodule ApiTimeManagerWeb.UserController do
 
   action_fallback ApiTimeManagerWeb.FallbackController
 
-  def sign_in(conn, %{"email" => email, "password" => password}) do
-    case ApiTimeManager.Accounts.token_sign_in(email, password) do
+  def sign_in(conn, %{"user" => user_params}) do
+    case ApiTimeManager.Accounts.token_sign_in(user_params["email"], user_params["password"]) do
       {:ok, token, _claims} ->
-        conn |> render("jwt.json", jwt: token)
+        user = ApiTimeManager.Repo.get_by(ApiTimeManager.User, email: user_params["email"])
+        data = %{"user" => user, "token" => token}
+        conn |> render("jwt.json", data: data)
       _ ->
         {:error, :unauthorized}
     end
@@ -30,7 +32,8 @@ defmodule ApiTimeManagerWeb.UserController do
   def create(conn, %{"user" => user_params}) do
     with {:ok, %ApiTimeManager.User{} = user} <- ApiTimeManager.Accounts.create_user(user_params),
          {:ok, token, _claims} <- Guardian.encode_and_sign(user) do
-      conn |> render("jwt.json", jwt: token)
+      data = %{"user" => user, "token" => token}
+      conn |> render("jwt.json", data: data)
     end
   end
 

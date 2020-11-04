@@ -22,8 +22,20 @@ defmodule ApiTimeManagerWeb.UserView do
     }
   end
 
-  def render("jwt.json", %{jwt: jwt}) do
-    %{jwt: jwt}
+  def render("jwt.json", %{data: data}) do
+    jwt = data["token"]
+    user = data["user"]
+    IO.inspect(user)
+    %{
+      jwt: jwt,
+      user: %{
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        inserted_at: user.inserted_at,
+        updated_at: user.updated_at
+      }
+    }
   end
 
 end

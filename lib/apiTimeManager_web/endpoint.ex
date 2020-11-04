@@ -34,6 +34,8 @@ defmodule ApiTimeManagerWeb.Endpoint do
     plug Phoenix.CodeReloader
     plug Phoenix.Ecto.CheckRepoStatus, otp_app: :apiTimeManager
   end
+  
+  plug CORSPlug, origin: "http://localhost:8081", methods: ["GET", "POST", "PUT", "DELETE"], headers: ["access-control-allow-origin", "content-type", "authorization"]
 
   plug Phoenix.LiveDashboard.RequestLogger,
     param_key: "request_logger",
