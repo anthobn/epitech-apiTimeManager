@@ -31,7 +31,6 @@ defmodule ApiTimeManagerWeb.Router do
     pipe_through [:api, :jwt_authenticated]
 
     resources "/users", UserController, except: [:new, :create, :edit]
-	  #options   "/users", UserController, :options
 
     scope "/workingtimes" do
       resources "/", WorkingTimeController, only: [:index, :update, :delete]
@@ -39,6 +38,11 @@ defmodule ApiTimeManagerWeb.Router do
     end
 
     resources "/clocks/:userID", ClockController, only: [:index, :create]
+
+    scope "/teams" do
+      resources "/", TeamController, only: [:index, :create]
+      resources "/:teamID", TeamController, only: [:show, :update, :delete]
+    end
 
 
   end

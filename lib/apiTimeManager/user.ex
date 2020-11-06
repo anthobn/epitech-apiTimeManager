@@ -14,6 +14,7 @@ defmodule ApiTimeManager.User do
 
     has_many :clocks, ApiTimeManager.Clock
     has_many :workingtimes, ApiTimeManager.WorkingTime
+    belongs_to :team, ApiTimeManager.Team
 
     timestamps()
   end
@@ -21,7 +22,7 @@ defmodule ApiTimeManager.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:username, :email, :password, :password_confirmation])
+    |> cast(attrs, [:username, :email, :password, :password_confirmation, :team_id])
     |> validate_required([:username, :email, :password, :password_confirmation])
     |> validate_format(:email, ~r/@/)
     |> validate_length(:password, min: 8)

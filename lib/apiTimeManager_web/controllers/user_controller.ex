@@ -9,6 +9,8 @@ defmodule ApiTimeManagerWeb.UserController do
     case ApiTimeManager.Accounts.token_sign_in(user_params["email"], user_params["password"]) do
       {:ok, token, _claims} ->
         user = ApiTimeManager.Repo.get_by(ApiTimeManager.User, email: user_params["email"])
+        user = ApiTimeManager.Repo.preload(user, :team)
+
         data = %{"user" => user, "token" => token}
         conn |> render("jwt.json", data: data)
       _ ->
@@ -19,59 +21,47 @@ defmodule ApiTimeManagerWeb.UserController do
   def index(conn, params) do
 
     if Map.has_key?(params, "email") && Map.has_key?(params, "username") do
-      renderONE(conn, ApiTimeManager.Repo.get_by(ApiTimeManager.User, [email: params["email"], username: params["username"]]))
+      user = ApiTimeManager.Repo.get_by(ApiTimeManager.User, [email: params["email"], username: params["username"]])
+      user = ApiTimeManager.Repo.preload(user, :team)
+      renderONE(conn, user)
     else
-      renderMANY(conn, ApiTimeManager.Repo.all(ApiTimeManager.User))
+      user = ApiTimeManager.Repo.all(ApiTimeManager.User)
+      user = ApiTimeManager.Repo.preload(user, :team)
+      renderMANY(conn, user)
     end
   end
 
   def show(conn, %{"id" => userID}) do
-    renderONE(conn, ApiTimeManager.Repo.get(ApiTimeManager.User, userID))
+    user =  ApiTimeManager.Repo.get(ApiTimeManager.User, userID)
+    user = ApiTimeManager.Repo.preload(user, :team)
+
+    renderONE(conn, user)
   end
 
   def create(conn, %{"user" => user_params}) do
     with {:ok, %ApiTimeManager.User{} = user} <- ApiTimeManager.Accounts.create_user(user_params),
          {:ok, token, _claims} <- Guardian.encode_and_sign(user) do
-      data = %{"user" => user, "token" => token}
-      conn |> render("jwt.json", data: data)
+          user = ApiTimeManager.Repo.preload(user, :team)
+          data = %{"user" => user, "token" => token}
+          conn |> render("jwt.json", data: data)
     end
   end
 
-@oldCreateMethodWithTuto """
-  def create(conn, %{"user" => user_params}) do
-    with {:ok, %ApiTimeManager.User{} = user} <- Accounts.create_user(user_params) do
-      conn
-      |> put_status(:created)
-      |> put_resp_header("location", user_path(conn, :show, user))
-      |> render("show.json", user: user)
-    end
-  end
+  def update(conn, %{"user" => user_params, "id" => userID}) do
+    {teamId, _} = Integer.parse(user_params["team_id"])
 
-"""
-
-@oldCreateMethod """
-  def create(conn, %{"email" => email, "username" => username}) do
-    changeset = ApiTimeManager.User.changeset(%ApiTimeManager.User{}, %{username: username, email: email})
-
-    if changeset.valid? do
-      ApiTimeManager.Repo.insert(changeset)
-      renderONE(conn, ApiTimeManager.Repo.get_by(ApiTimeManager.User, [email: email, username: username]))
-    else
-      renderStatus(conn, 404)
-    end
-  end
-"""
-
-  def update(conn, %{"id" => userID, "email" => email, "username" => username}) do
     user = ApiTimeManager.Repo.get!(ApiTimeManager.User, userID)
 
-    changeset = ApiTimeManager.User.changeset(user, %{email: email, username: username})
+    changeset = ApiTimeManager.User.changeset(user, %{email: user_params["email"], username: user_params["username"], team_id: teamId, password: user_params["password"], password_confirmation: user_params["password_confirmation"]})
 
     if changeset.valid? do
 
       ApiTimeManager.Repo.update(changeset)
 
-      renderONE(conn, ApiTimeManager.Repo.get!(ApiTimeManager.User, userID))
+      user = ApiTimeManager.Repo.get!(ApiTimeManager.User, userID)
+      user = ApiTimeManager.Repo.preload(user, :team)
+
+      renderONE(conn, user)
     else
       renderStatus(conn, 404)
     end

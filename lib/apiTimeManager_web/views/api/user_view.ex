@@ -11,29 +11,69 @@ defmodule ApiTimeManagerWeb.UserView do
   end
 
   def render("user.json", %{user: user}) do
-    %{
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      inserted_at: user.inserted_at,
-      updated_at: user.updated_at
-    }
+    if user.team !== nil do
+      %{
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        team: %{
+          name: user.team.name,
+          id: user.team.id,
+          inserted_at: user.team.inserted_at,
+          updated_at: user.team.updated_at,
+        },
+        inserted_at: user.inserted_at,
+        updated_at: user.updated_at
+      }
+    else
+      %{
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        team_id: user.team_id,
+        inserted_at: user.inserted_at,
+        updated_at: user.updated_at
+      }
+    end
   end
 
   def render("jwt.json", %{data: data}) do
     jwt = data["token"]
     user = data["user"]
-    IO.inspect(user)
-    %{
-      jwt: jwt,
-      user: %{
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        inserted_at: user.inserted_at,
-        updated_at: user.updated_at
-      }
-    }
-  end
+    
+    if user.team !== nil do
 
+      %{
+        jwt: jwt,
+        user: %{
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          team: %{
+            name: user.team.name,
+            id: user.team.id,
+            inserted_at: user.team.inserted_at,
+            updated_at: user.team.updated_at,
+          },
+          inserted_at: user.inserted_at,
+          updated_at: user.updated_at
+        }
+      }
+
+    else
+
+      %{
+        jwt: jwt,
+        user: %{
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          team_id: user.team_id,
+          inserted_at: user.inserted_at,
+          updated_at: user.updated_at
+        }
+      }
+
+    end
+  end
 end
